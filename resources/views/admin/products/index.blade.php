@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Dashboard</title>
+    <title>Quản lý sản phẩm</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container mt-5">
-        <h1>Admin Dashboard</h1>
-        <h3>Chào mừng Admin!</h3>
+        <h1>Quản lý sản phẩm</h1>
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
@@ -18,6 +17,7 @@
                     <th>ID</th>
                     <th>Tên</th>
                     <th>Giá</th>
+                    <th>Danh mục</th>
                     <th>Hành động</th>
                 </tr>
             </thead>
@@ -27,8 +27,10 @@
                         <td>{{ $product->id }}</td>
                         <td>{{ $product->name }}</td>
                         <td>{{ number_format($product->price, 0, ',', '.') }} VNĐ</td>
+                        <td>{{ $product->category->name ?? 'Chưa có' }}</td>
                         <td>
                             <a href="{{ route('products.edit', $product->id) }}" class="btn btn-warning btn-sm">Sửa</a>
+                            <a href="{{ route('products.show', $product->id) }}" class="btn btn-info btn-sm">Xem</a>
                             <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display:inline;">
                                 @csrf
                                 @method('DELETE')

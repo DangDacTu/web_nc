@@ -6,14 +6,15 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Auth\LoginController;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\RoleController;
-
+use App\Http\Controllers\CartController; // Thêm CartController
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::get('/role', [RoleController::class, 'index']);
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         if (Auth::check()) {
@@ -27,25 +28,24 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['can:user'])->group(function () {
         Route::get('/user/dashboard', [HomeController::class, 'userDashboard'])
             ->name('user.dashboard');
-        // Các route chỉ cho user (nếu có)
+        // Route cho user xem sản phẩm và giỏ hàng
+        Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+        Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
+        Route::post('/cart/add/{id}', [ProductController::class, 'addToCart'])->name('cart.add');
+        Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+        // Route xem đơn hàng
+        Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     });
 
     Route::middleware(['can:admin'])->group(function () {
         Route::get('/admin/dashboard', [AdminController::class, 'index'])
             ->name('admin.dashboard');
-        // Chỉ admin mới được quản lý sản phẩm
+        // Quản lý sản phẩm (CRUD đầy đủ)
         Route::resource('products', ProductController::class);
-        // Chỉ admin mới được tạo/sửa/xóa đơn hàng
-        Route::get('orders/create', [OrderController::class, 'create'])->name('orders.create');
-        Route::post('orders', [OrderController::class, 'store'])->name('orders.store');
-        Route::get('orders/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
-        Route::put('orders/{order}', [OrderController::class, 'update'])->name('orders.update');
-        Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
+        // Quản lý đơn hàng (CRUD đầy đủ)
+        Route::resource('orders', OrderController::class);
     });
-
-    // Các route xem đơn hàng cho cả user và admin
-    Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
